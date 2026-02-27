@@ -1,0 +1,44 @@
+name: CI Microservices
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 1. Build de imágenes Docker localmente (para CI)
+    - name: Build Docker images
+      run: |
+        docker build -t service1:latest ./service1
+        docker build -t service2:latest ./service2
+        docker build -t service3:latest ./service3
+
+    # 2. Opcional: Run tests de Node.js para validar que levantan
+    - name: Install dependencies & test service1
+      run: |
+        cd service1
+        npm install
+        node index.js & sleep 5
+        curl -f http://localhost:3001 || exit 1
+        pkill node
+    - name: Install dependencies & test service2
+      run: |
+        cd service2
+        npm install
+        node index.js & sleep 5
+        curl -f http://localhost:3002 || exit 1
+        pkill node
+    - name: Install dependencies & test service3
+      run: |
+        cd service3
+        npm install
+        node index.js & sleep 5
+        curl -f http://localhost:3003 || exit 1
+        pkill node
